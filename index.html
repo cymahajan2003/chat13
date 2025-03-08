@@ -1,22 +1,103 @@
-const translate = require('google-translate-api-x');
-
-const text = "Hello, how are you?";  // Change this to the text you want to translate
-
-const languages = {
-    "as": "Assamese", "bn": "Bengali", "gu": "Gujarati", "hi": "Hindi", "kn": "Kannada",
-    "ks": "Kashmiri", "ml": "Malayalam", "mr": "Marathi", "ne": "Nepali", "or": "Odia",
-    "pa": "Punjabi", "sa": "Sanskrit", "sd": "Sindhi", "ta": "Tamil", "te": "Telugu",
-    "ur": "Urdu", "kok": "Konkani", "mai": "Maithili", "mni": "Manipuri", "bodo": "Bodo",
-    "doi": "Dogri", "sat": "Santali"
-};
-
-(async () => {
-    for (const [code, lang] of Object.entries(languages)) {
-        try {
-            const res = await translate(text, { to: code });
-            console.log(`${lang} (${code}): ${res.text}`);
-        } catch (error) {
-            console.log(`Error translating to ${lang}: ${error.message}`);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Translator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-    }
-})();
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Translator</h1>
+        <textarea id="inputText" placeholder="Enter text here..."></textarea>
+        <select id="languageSelect"></select>
+        <button onclick="translateText()">Translate</button>
+        <p id="outputText"></p>
+    </div>
+
+    <script>
+        const languages = {
+            "as": "Assamese", "bn": "Bengali", "gu": "Gujarati", "hi": "Hindi", "kn": "Kannada",
+            "ks": "Kashmiri", "ml": "Malayalam", "mr": "Marathi", "ne": "Nepali", "or": "Odia",
+            "pa": "Punjabi", "sa": "Sanskrit", "sd": "Sindhi", "ta": "Tamil", "te": "Telugu",
+            "ur": "Urdu", "kok": "Konkani", "mai": "Maithili", "mni": "Manipuri", "bodo": "Bodo",
+            "doi": "Dogri", "sat": "Santali"
+        };
+
+        // Populate language dropdown
+        const langSelect = document.getElementById("languageSelect");
+        Object.entries(languages).forEach(([code, name]) => {
+            let option = document.createElement("option");
+            option.value = code;
+            option.textContent = name;
+            langSelect.appendChild(option);
+        });
+
+        async function translateText() {
+            const text = document.getElementById("inputText").value;
+            const lang = document.getElementById("languageSelect").value;
+
+            if (!text) {
+                alert("Please enter text to translate.");
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, lang })
+            });
+
+            const data = await response.json();
+            document.getElementById("outputText").textContent = "Translated: " + data.translation;
+        }
+    </script>
+</body>
+</html>
