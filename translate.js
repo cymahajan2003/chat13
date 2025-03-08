@@ -9,11 +9,16 @@ app.use(cors());
 app.post('/translate', async (req, res) => {
     const { text, lang } = req.body;
 
+    if (!text || !lang) {
+        return res.status(400).json({ error: "Text or language missing" });
+    }
+
     try {
         const result = await translate(text, { to: lang });
         res.json({ translation: result.text });
     } catch (error) {
-        res.status(500).json({ error: "Translation failed" });
+        console.error("Translation Error:", error);
+        res.status(500).json({ error: "Translation failed. Try again later." });
     }
 });
 
