@@ -1,22 +1,20 @@
-const translate = require('google-translate-api-x');
+const express = require('express');
+const cors = require('cors');
+const translate = require('@vitalets/google-translate-api');
 
-const text = "Hello, how are you?";  // Change this to the text you want to translate
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-const languages = {
-    "as": "Assamese", "bn": "Bengali", "gu": "Gujarati", "hi": "Hindi", "kn": "Kannada",
-    "ks": "Kashmiri", "ml": "Malayalam", "mr": "Marathi", "ne": "Nepali", "or": "Odia",
-    "pa": "Punjabi", "sa": "Sanskrit", "sd": "Sindhi", "ta": "Tamil", "te": "Telugu",
-    "ur": "Urdu", "kok": "Konkani", "mai": "Maithili", "mni": "Manipuri", "bodo": "Bodo",
-    "doi": "Dogri", "sat": "Santali"
-};
+app.post('/translate', async (req, res) => {
+    const { text, lang } = req.body;
 
-(async () => {
-    for (const [code, lang] of Object.entries(languages)) {
-        try {
-            const res = await translate(text, { to: code });
-            console.log(`${lang} (${code}): ${res.text}`);
-        } catch (error) {
-            console.log(`Error translating to ${lang}: ${error.message}`);
-        }
+    try {
+        const result = await translate(text, { to: lang });
+        res.json({ translation: result.text });
+    } catch (error) {
+        res.status(500).json({ error: "Translation failed" });
     }
-})();
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
